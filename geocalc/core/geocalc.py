@@ -4,7 +4,7 @@ from utils import input_check_Nx3 as _input_check_Nx3
 from utils import input_check_Nx3x3 as _input_check_Nx3x3
 from utils import input_check_Nx1 as _input_check_Nx1
 
-def earthrad(lat, lat_unit='deg', model='wgs84'):
+def earthrad(lat):
     """
     Calculate radius of curvature in the prime vertical (East-West) and 
     meridian (North-South) at a given latitude.
@@ -34,22 +34,15 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     >>> Rmeridian
     array([ 6335439.32729283,  6399593.62575849])
     """
-    if(lat_unit=='deg'):
-        lat = np.deg2rad(lat)
-    elif(lat_unit=='rad'):
-        pass
-    else:
-        raise ValueError('Input unit unknown')
+    
+    lat = np.deg2rad(lat)
 
-    if(model=='wgs84'):
-        R_N = wgs84.a/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**0.5
-        R_M = wgs84.a*(1-wgs84._ecc_sqrd)/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**1.5
-    else:
-        raise ValueError('Model unknown')
+    R_N = wgs84.a/np.sqrt(1-wgs84._ecc_sqrd*np.sin(lat)**2)
+    R_M = wgs84.a*(1-wgs84._ecc_sqrd)/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**1.5
     
     return R_N, R_M
 
-def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
+def lla2ecef(lat, lon, alt):
     """
     Convert Latitude, Longitude, Altitude, to ECEF position
     
@@ -70,14 +63,12 @@ def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
     if( (N1!=N2) or (N2!=N3) or (N1!=N3) ):
         raise ValueError('Inputs are not of the same dimension')
     
-    if(model=='wgs84'):
-        Rew,Rns = earthrad(lat,lat_unit=latlon_unit)
-    else:
-        Rew = wgs84.a 
     
-    if(latlon_unit=='deg'):
-        lat = np.deg2rad(lat)
-        lon = np.deg2rad(lon)
+    Rew,Rns = earthrad(lat)
+    
+    
+    lat = np.deg2rad(lat)
+    lon = np.deg2rad(lon)
     
     x = (Rew + alt)*np.cos(lat)*np.cos(lon)
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
@@ -90,7 +81,7 @@ def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
 
     return ecef
 
-def ecef2lla(ecef, latlon_unit='deg'):
+def ecef2lla(ecef):
     """
     Calculate the Latitude, Longitude and Altitude of a point located on earth 
     given the ECEF Coordinates.
@@ -116,7 +107,6 @@ def ecef2lla(ecef, latlon_unit='deg'):
         x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
     else:
         x = ecef[0]; y = ecef[1]; z = ecef[2]
-
     lon = np.arctan2(y,x)
 
     # Iteration to get Latitude and Altitude
@@ -126,21 +116,20 @@ def ecef2lla(ecef, latlon_unit='deg'):
     err = np.ones(N)
 
     while(np.max(np.abs(err))>1e-10):
-        Rew,Rns = earthrad(lat,lat_unit='rad')
+        Rew,Rns = earthrad(lat)
         h = p/np.cos(lat) - Rew
         
         err = np.arctan2(z*(1+wgs84._ecc_sqrd*Rew*np.sin(lat)/z),p) - lat
         
         lat = lat + err
     
-    if(latlon_unit=='deg'):
-        lat = np.rad2deg(lat)
-        lon = np.rad2deg(lon)
+    lat = np.rad2deg(lat)
+    lon = np.rad2deg(lon)
 
     return lat, lon, h
 
 
-def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', model='wgs84'):
+def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):
     """
     Convert Latitude, Longitude, Altitude to its resolution in the NED
     coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
@@ -162,16 +151,12 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_uni
     -------
     ned : {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
-    ecef  = lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
-                           alt_unit=alt_unit, model=model)
-    ecef0 = lla2ecef(lat_ref, lon_ref, alt_ref,
-                           latlon_unit=latlon_unit, 
-                           alt_unit=alt_unit, model=model)
-    ned  = ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref, 
-                          latlon_unit=latlon_unit, alt_unit=alt_unit, model=model)
+    ecef  = lla2ecef(lat, lon, alt)
+    ecef0 = lla2ecef(lat_ref, lon_ref, alt_ref)
+    ned  = ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref)
     return ned
 
-def ned2lla(ned, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', model='wgs84'):
+def ned2lla(ned, lat_ref, lon_ref, alt_ref):
     """
     Calculate the Latitude, Longitude and Altitude of points given by NED coordinates
     where NED origin given by lat_ref, lon_ref, and alt_ref.
@@ -193,21 +178,19 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', mod
     This method is a wrapper on ned2ecef (add ecef of NED-origin) and ecef2lla.
     """
 
-    ecef = ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit=latlon_unit,
-                                                alt_unit=alt_unit,
-                                                model=model)
+    ecef = ned2ecef(ned,lat_ref,lon_ref,alt_ref)
+
     # Add vector to ecef representation of NED-origin
-    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref, latlon_unit=latlon_unit,
-                                                   alt_unit=alt_unit,
-                                                   model=model)
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
+
     ecef += ecef_ref
 
-    lla = ecef2lla(ecef, latlon_unit=latlon_unit)
+    lla = ecef2lla(ecef)
 
     return lla
 
 
-def ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
+def ned2ecef(ned,lat_ref,lon_ref,alt_ref):
     """
     Transform a vector resolved in NED (origin given by lat_ref, lon_ref, and alt_ref)
     coordinates to its ECEF representation. 
@@ -250,13 +233,8 @@ def ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='w
     
     C = np.zeros((3,3))
 
-    if(latlon_unit=='deg'):
-        lat_ref = np.deg2rad(lat_ref)
-        lon_ref = np.deg2rad(lon_ref)
-    elif(latlon_unit=='rad'):
-        pass
-    else:
-        raise ValueError('Input unit unknown')
+    lat_ref = np.deg2rad(lat_ref)
+    lon_ref = np.deg2rad(lon_ref)
 
     C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
     C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
@@ -279,7 +257,7 @@ def ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='w
 
     return ecef
 
-def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
+def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the NED
     coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
@@ -315,13 +293,9 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     
     C = np.zeros((3,3))
 
-    if(latlon_unit=='deg'):
-        lat_ref = np.deg2rad(lat_ref)
-        lon_ref = np.deg2rad(lon_ref)
-    elif(latlon_unit=='rad'):
-        pass
-    else:
-        raise ValueError('Input unit unknown')
+    lat_ref = np.deg2rad(lat_ref)
+    lon_ref = np.deg2rad(lon_ref)
+
 
     C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
     C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
