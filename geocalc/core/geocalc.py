@@ -107,26 +107,23 @@ def ecef2lla(ecef):
         x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
     else:
         x = ecef[0]; y = ecef[1]; z = ecef[2]
-    lon = np.arctan2(y,x)
 
-    # Iteration to get Latitude and Altitude
     p = np.sqrt(x**2 + y**2)
-    lat = np.arctan2(z,p*(1-wgs84._ecc_sqrd))
 
-    err = np.ones(N)
+    theta = np.arctan2((z * wgs84.a) , (p * wgs84.b))
 
-    while(np.max(np.abs(err))>1e-10):
-        Rew,Rns = earthrad(lat)
-        h = p/np.cos(lat) - Rew
-        
-        err = np.arctan2(z*(1+wgs84._ecc_sqrd*Rew*np.sin(lat)/z),p) - lat
-        
-        lat = lat + err
-    
+    lon = np.arctan2(y , x)
+
+    lat = np.arctan2((z + (wgs84.e2**2) * wgs84.b * (np.sin(theta)**3)) , ((p - (wgs84.e_pow) * wgs84.a * (np.cos(theta)**3))))
+    N = wgs84.a / (np.sqrt(1 - ((wgs84.e_pow) * (np.sin(lat)**2))))
+
+    m = (p / np.cos(lat))
+    alt = m - N
+
     lat = np.rad2deg(lat)
     lon = np.rad2deg(lon)
 
-    return lat, lon, h
+    return lat, lon, alt
 
 
 def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):

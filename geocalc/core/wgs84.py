@@ -51,6 +51,7 @@ Note, examples don't print full precision.
 >>> print(wgs84._ecc_sqrd)
 0.00669437999014
 """
+import numpy as np
 
 # Table 3.1: WGS 84  Four Defining Parameters
 a = 6378137.0 # Semi-major Axis [m]
@@ -70,6 +71,12 @@ GM_GPS = 3986005.0e8 # The WGS 84 GM value recommended for GPS receiver usage
                      # reference: 3.2.3.2 "Special Considerations for GPS"
 
 # Table 3.3: WGS 84 Ellipsoid Derived Geometric Constants
+b = 6356752.3142 # Semi-minor axis [m]
+
+f = 0.0034
+e = np.sqrt(((a**2) - (b**2)) / (a**2))
+e2 = np.sqrt(((a**2) - (b**2)) /(b**2))
+e_pow = e**2
 _b = 6356752.3142 # Semi-minor axis [m]
 _ecc = 8.1819190842622e-2 # First eccentricity
 _ecc_sqrd = 6.69437999014e-3 # First eccentricity squared
