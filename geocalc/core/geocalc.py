@@ -37,8 +37,8 @@ def earthrad(lat):
     
     lat = np.deg2rad(lat)
 
-    R_N = wgs84.a/np.sqrt(1-wgs84._ecc_sqrd*np.sin(lat)**2)
-    R_M = wgs84.a*(1-wgs84._ecc_sqrd)/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**1.5
+    R_N = wgs84.a/np.sqrt(1-wgs84.e_sqrd*np.sin(lat)**2)
+    R_M = wgs84.a*(1-wgs84.e_sqrd)/(1-wgs84.e_sqrd*np.sin(lat)**2)**1.5
     
     return R_N, R_M
 
@@ -72,7 +72,7 @@ def lla2ecef(lat, lon, alt):
     
     x = (Rew + alt)*np.cos(lat)*np.cos(lon)
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
-    z = ( (1-wgs84._ecc_sqrd)*Rew + alt )*np.sin(lat)
+    z = ( (1-wgs84.e_sqrd)*Rew + alt )*np.sin(lat)
     
     ecef = np.vstack((x,y,z)).T
 
@@ -114,8 +114,8 @@ def ecef2lla(ecef):
 
     lon = np.arctan2(y , x)
 
-    lat = np.arctan2((z + (wgs84.e2**2) * wgs84.b * (np.sin(theta)**3)) , ((p - (wgs84.e_pow) * wgs84.a * (np.cos(theta)**3))))
-    N = wgs84.a / (np.sqrt(1 - ((wgs84.e_pow) * (np.sin(lat)**2))))
+    lat = np.arctan2((z + (wgs84.e2**2) * wgs84.b * (np.sin(theta)**3)) , ((p - (wgs84.e_sqrd) * wgs84.a * (np.cos(theta)**3))))
+    N = wgs84.a / (np.sqrt(1 - ((wgs84.e_sqrd) * (np.sin(lat)**2))))
 
     m = (p / np.cos(lat))
     alt = m - N
