@@ -148,9 +148,8 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):
     -------
     ned : {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
-    ecef  = lla2ecef(lat, lon, alt)
-    ecef0 = lla2ecef(lat_ref, lon_ref, alt_ref)
-    ned  = ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref)
+    ecef = lla2ecef(lat, lon, alt)
+    ned = ecef2ned(ecef, lat_ref, lon_ref, alt_ref)
     return ned
 
 def ned2lla(ned, lat_ref, lon_ref, alt_ref):
@@ -176,11 +175,6 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref):
     """
 
     ecef = ned2ecef(ned,lat_ref,lon_ref,alt_ref)
-
-    # Add vector to ecef representation of NED-origin
-    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
-
-    ecef += ecef_ref
 
     lla = ecef2lla(ecef)
 

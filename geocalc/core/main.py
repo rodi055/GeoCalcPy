@@ -35,7 +35,7 @@ class CoordinatesConverterTests(unittest.TestCase):
         self.assertAlmostEqual(y, 2847307.26, places=1)
         self.assertAlmostEqual(z, 3170423.73, places=1)
 
-    '''def test_ned2lla(self):
+    def test_ned2lla(self):
         lat_ref, lon_ref, alt_ref = 29, 30, 0
         north, east, down = 93129.29, 96482.89, -6371513.44
         lat, lon, alt = geocalc.ned2lla([north, east, down], lat_ref, lon_ref, alt_ref)
@@ -45,12 +45,12 @@ class CoordinatesConverterTests(unittest.TestCase):
 
     def test_lla2ned(self):
         lat_ref, lon_ref, alt_ref = 29, 30, 0
-        x, y, z = 4738715.05, 2847307.26, 3170423.73
-        ned = geocalc.ned2ecef([x, y, z], lat_ref, lon_ref, alt_ref)
-        north, east , down = ned[0], ned[1], ned[2]
-        self.assertAlmostEqual(north, 4738715.05, places=1)
-        self.assertAlmostEqual(east, 2847307.26, places=1)
-        self.assertAlmostEqual(down, 3170423.73, places=1)'''
+        lat, lon, alt = 30, 31, 100
+        ned = geocalc.lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref)
+        north, east, down = ned[0], ned[1], ned[2]
+        self.assertAlmostEqual(north, 93129.29, places=1)
+        self.assertAlmostEqual(east, 96482.89, places=1)
+        self.assertAlmostEqual(down, -6371513.44, places=1)
 
 
 if __name__ == '__main__':
