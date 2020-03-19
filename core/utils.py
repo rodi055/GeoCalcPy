@@ -8,7 +8,7 @@ LICENSE.txt
 import sys
 
 import numpy as _np
-from past.builtins import raw_input
+from pip._vendor.distlib.compat import raw_input
 
 
 def input_check_Nx1(x):

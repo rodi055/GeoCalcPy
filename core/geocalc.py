@@ -1,8 +1,8 @@
 import numpy as np
 
-import wgs84
-from utils import input_check_Nx1 as _input_check_Nx1
-from utils import input_check_Nx3 as _input_check_Nx3
+from core import wgs84
+from core.utils import input_check_Nx1 as _input_check_Nx1
+from core.utils import input_check_Nx3 as _input_check_Nx3
 
 
 def earthrad(lat):
