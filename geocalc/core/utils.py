@@ -5,8 +5,11 @@ Use of this source code is governed by a BSD-style license that can be found in
 LICENSE.txt
 """
 
-import numpy as _np
 import sys
+
+import numpy as _np
+from past.builtins import raw_input
+
 
 def input_check_Nx1(x):
     """
@@ -16,7 +19,7 @@ def input_check_Nx1(x):
     x = _np.atleast_1d(x)
     theSize = _np.shape(x)
 
-    if(len(theSize) > 1):
+    if (len(theSize) > 1):
         # 1. Input must be of size N x 1
         if ((theSize[0] != 1) & (theSize[1] != 1)):
             raise ValueError('Not an N x 1 array')
@@ -36,7 +39,7 @@ def input_check_Nx3(x):
     x = _np.atleast_2d(x)
     theSize = _np.shape(x)
 
-    if(len(theSize) > 1):
+    if (len(theSize) > 1):
         # 1. Input must be of size N x 3
         if ((theSize[0] != 3) & (theSize[1] != 3)):
             raise ValueError('Not a N x 3 array')
@@ -59,7 +62,7 @@ def input_check_Nx3x3(x):
     theSize = _np.shape(x)
     N = 1
 
-    if(len(theSize) > 2):
+    if (len(theSize) > 2):
         # 1. Input must be of size N x 3
         if (3, 3) not in (theSize[:2], theSize[-2:]):
             raise ValueError('Not a N x 3 x 3 array')
@@ -70,7 +73,7 @@ def input_check_Nx3x3(x):
         # 3. If N == 2, make it into a 2-D array
         if (x.shape[0] == 1):
             x = x[0]
-    elif(theSize != (3, 3)):
+    elif (theSize != (3, 3)):
         raise ValueError('Not a 3 x 3 array')
 
     return x, N
@@ -97,11 +100,11 @@ def loadtxt2dic(filename):
         print(line)
         # Skip lines beginning with # or blank
         # Note: Python treats '' as False
-        if(line.startswith('#') or line.startswith('\n') or (not line)):
+        if (line.startswith('#') or line.startswith('\n') or (not line)):
             continue
 
         # If line ends with a comma, it continues to the next line.
-        if(line.endswith(',')):
+        if (line.endswith(',')):
             prev_line = line.strip()
             continue
         else:
@@ -111,13 +114,13 @@ def loadtxt2dic(filename):
         item = line.split('#', 1)[0].strip()  # May have comment after the line
         item = item.replace(':', ' ').replace('=', ' ').split(None, 1)
 
-        if(len(item) == 0):
+        if (len(item) == 0):
             continue
 
         try:
             param[item[0]] = eval(item[1])
 
-            if(type(eval(item[1])) == list):
+            if (type(eval(item[1])) == list):
                 param[item[0]] = _np.array(eval(item[1]))
 
         except NameError:
@@ -165,8 +168,8 @@ def status_update(i, drl, message, bar_length=20):
     spaces = ' ' * (bar_length - len(hashes))
 
     mmsg = message
-    if(len(mmsg) > 0):
-        if(mmsg[-1] != '\n'):
+    if (len(mmsg) > 0):
+        if (mmsg[-1] != '\n'):
             mmsg = mmsg + '\n'
 
     sys.stdout.write("\r[%s] %3d%% :: %s" %
